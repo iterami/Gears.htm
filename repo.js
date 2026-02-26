@@ -2,9 +2,15 @@
 
 function repo_init(){
     core_repo_init({
+      'events': {
+        'reset': {
+          'onclick': reset,
+        },
+      },
       'globals': {
         'gears': [],
       },
+      'info': '<button class=medium id=reset type=button>Reset</button>',
       'storage': {
         'count': 10,
         'interval': 100,
@@ -23,18 +29,28 @@ function repo_init(){
       ],
     });
 
+    reset(true);
+}
+
+function reset(force){
+    if(force !== true
+      && !globalThis.confirm('Reset gears?')){
+        return;
+    }
+
+    core_object_reset(gears);
     for(let i = 0; i < core_storage_data.count; i++){
         gears.push({
           'rotation': 0,
           'total': 0,
         });
     }
-
     for(let i = 0; i < core_storage_data.rotations; i++){
         rotate_gears(false);
     }
     update_table();
 
+    core_escape(false);
     core_interval_modify({
       'id': 'interval',
       'interval': core_storage_data.interval,
@@ -43,7 +59,6 @@ function repo_init(){
 }
 
 function rotate_gears(update){
-    let result = '';
     for(let i = 0; i < gears.length; i++){
         const rotation = Math.pow(
           core_storage_data.ratio,
@@ -56,8 +71,6 @@ function rotate_gears(update){
             gears[i].total += 1;
         }
     }
-    core_elements.result.innerHTML = result;
-
     if(update !== false){
         update_table();
     }
